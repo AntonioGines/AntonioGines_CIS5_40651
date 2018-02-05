@@ -1,8 +1,8 @@
 /* 
  * File:   main.cpp
- * Author: Dr. Mark E. Lehr
- * Created on January 17, 2018
- * Purpose:  Calculate Phone Call Charges
+ * Author: Antonio Gines
+ * Created on February,2, 2018
+ * Purpose:  Calculate Amount That Should Be Invested
  */
 
 //System Libraries Here
@@ -15,7 +15,6 @@ using namespace std;
 
 //Global Constants Only, No Global Variables
 //Like PI, e, Gravity, or conversions
-const int PERCENT=100;
 
 //Function Prototypes Here
 float invest(int, float);

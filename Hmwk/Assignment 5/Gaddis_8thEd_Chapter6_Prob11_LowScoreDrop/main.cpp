@@ -1,6 +1,6 @@
 /* 
  * File:   main.cpp
- * Author: Dr. Mark E. Lehr
+ * Author: Antonio Gines
  * Created on Febuary 2, 2018
  * Purpose:  Dropping Lowest Score
  */

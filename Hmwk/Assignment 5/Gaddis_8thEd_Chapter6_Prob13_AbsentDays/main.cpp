@@ -1,6 +1,6 @@
 /* 
  * File:   main.cpp
- * Author: Dr. Mark E. Lehr
+ * Author: Antonio Gines
  * Created on February,3, 2018
  * Purpose:  Calculate Phone Call Charges
  */
