@@ -13,6 +13,7 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <vector>
 using namespace std;
 
 //User Libraries
@@ -21,20 +22,25 @@ using namespace std;
 //                   2-D Array Dimensions
 
 //Function Prototypes
-int ace();
+int ace();                                    //Choose Whether an Ace=1 or 11
 int Dealt(int &,int &);                       //Player's Total Cards Dealt
-void Dealt(int [],int = 10);                  //Cards Dealt to the Dealer
+void Dealt(int [][2]);                        //Cards Dealt to the Dealer
+void Names(vector<string> &,int);             //Player's and Dealer's Name
+void Dsort(int [][2], int);                   //Sort the Dealer's Cards
+int  Largest(int [][2], int);                 //Dealer's Largest Card
+bool AutoWin(int, int);
 
 //Execution Begins Here
 int main(int argc, char** argv) {
     //Declare Variables
     int SIZE=10;
+    int PPL=1;          
     int bet,newbet,total,rng1,rng2,card1,card2,card3,card4,payout;
     int total1,total2,split1,split2,dealer1,dealer2,dealer3,dealtot;
-    int dealer[SIZE];
+    int dealer[10][2];
     char choice, hitagn, playagn;
     bool win;
-    string name;
+    vector<string> name(2);
     ifstream file;
     
     //Seed Random Number Generator
@@ -53,24 +59,24 @@ int main(int argc, char** argv) {
     }file.close();
 
     //Initialized Variables
-    cout<<"Before we begin, what is your name?"<<endl;
-    cin>>name;
+    cout<<"Before we begin, what is your name and what is the "
+        <<"dealer's name?"<<endl;
+    Names( name, PPL);
     do{
+    int count1=0;
     newbet=0;
     bet=0;
-    card1=(rand()%11)+1;                 //Player's Randomized Cards
-    card2=(rand()%11)+1;
-    card3=(rand()%11)+1;
-    card4=(rand()%11)+1;
-    Dealt(dealer,SIZE);                  //Dealer's Randomized
+    Dealt(dealer);                 //Dealer's and Player's Randomized Cards
     while(card1==11&&card1==card2){       
         card2=(rand()%11)+1;
     }
     do{                                    //Enter Player name
-        cout<<"Mr./Mrs. "<<name<<" please enter a bet of at least $15 and at"
+        cout<<"Mr./Mrs. "<<name[0]<<" please enter a bet of at least $15 and at"
         <<" most $500"<<endl;
         cin>>bet;
     }while(bet>500||bet<15);
+    card1=dealer[0][0];
+    card2=dealer[0][1];
     cout<<"Your first two cards are:"<<endl;
     cout<<card1<<" and "<<card2<<endl;    //Deal The Cards
     if(card1==1||card1==11){              //Choosing what happens if you get  
@@ -84,7 +90,9 @@ int main(int argc, char** argv) {
     if(card1>card2){
         rng1=card1;
     }else rng1=card2;
-    win=total>21?true:false;
+    //Determine Auto Win
+    win=AutoWin(card1, card2);
+    win?cout<<"Congratulations! It's a Blackjack,you win"<<endl:cout<<endl;
     if(win){                              //If it is 21
         cout<<"Your payout is:"<<endl;
         cout<<"$"<<fixed<<setprecision(2)<<showpoint<<static_cast<float>(bet)
@@ -94,7 +102,7 @@ int main(int argc, char** argv) {
         exit(0);
     }
     cout<<"The dealer drew:"<<endl;        //Dealer's Turn
-    cout<<dealer[0]<<endl;
+    cout<<dealer[1][0]<<endl;
     if(card1==card2){                      //Choices when you are able to split
         cout<<"If you wish to Hit type H"<<endl;
         cout<<"If you wish to Stand type S"<<endl;
@@ -117,7 +125,8 @@ int main(int argc, char** argv) {
     }
     switch(choice){                       //Begin switch based on input
         case 'H':do{                      //Choosing to hit
-                    card3=(rand()%11)+1;
+                    card3=dealer[0][count1+2];
+                    count1++;
                     cout<<"You have chosen to hit and your card is:"<<endl;
                     cout<<card3<<endl;
                     if(card3==1||card3==11){  //Choosing what happens if you get  
@@ -140,6 +149,7 @@ int main(int argc, char** argv) {
         case 'S':cout<<endl;break;          //Choosing to stay
         
         case 'D':bet+=bet;             //Choosing to double and incrementing bet
+                 card3=dealer[0][2];
                  cout<<"You have doubled your initial bet to"<<endl;
                  cout<<fixed<<setprecision(2)<<showpoint
                  <<static_cast<float>(bet)<<endl;
@@ -161,6 +171,8 @@ int main(int argc, char** argv) {
                  cout<<"You have doubled your initial bet and split it into "
                      <<"two hands."<<endl;
                  bet+=bet;                 //Incrementing the bet
+                 card3=dealer[0][2];
+                 card4=dealer[0][3];
                  cout<<"The dealer will now add a card to both hands."<<endl;
                  cout<<"To the first hand the dealer added"<<endl;
                  cout<<card3<<endl;         //Card added to the first hand
@@ -196,36 +208,44 @@ int main(int argc, char** argv) {
         cout<<"Sorry, your total of "<<total<<" is greater than 21. It's a "
             <<"bust, thanks for your cash!"<<endl;
     }else{
-        dealtot=dealer[0]+dealer[1];             //If it's not an immediate bust
+        dealtot=dealer[1][0]+dealer[1][1];       //If it's not an immediate bust
         cout<<"The dealer will now reveal their second card and choose whether "
              <<"or not to hit"<<endl;
         cout<<"The dealer's second card is:"<<endl;
-        cout<<dealer[1]<<endl;
+        cout<<dealer[1][1]<<endl;
         int count=0;
         while(dealtot<=total){      //Determine whether dealer hits
-            dealtot+=dealer[count+2];
+            dealtot+=dealer[1][count+2];
             cout<<"The dealer chose to hit and the card drawn was:"<<endl;
-            cout<<dealer[count+2]<<endl;
+            cout<<dealer[1][count+2]<<endl;
             count++;
+        }if (count<=2){
+            count=2;
         }
         cout<<"The dealer's total is:"<<endl;
         cout<<dealtot<<endl;
         if(dealtot>21){                        // If Dealer Busts
-            cout<<"Congratulations, the dealer busts meaning you won!"<<endl;
+            cout<<"Congratulations! "<<name[1]
+            <<" the dealer busts meaning you won!"<<endl;
             cout<<"Your payout is $"<<fixed<<setprecision(2)<<showpoint
                 <<static_cast<float>(bet)<<endl;
             cout<<"And your largest card was "
                 <<static_cast<int>(fmax(rng1,rng2))<<endl;
         }
         else if(total<=21&&total>dealtot){      //If you win
-            cout<<"Congratulations you beat the dealer! Your payout is $"
+            cout<<"Congratulations! You beat "<<name[1]<<" the dealer! "<<endl;
+            cout<<"Your payout is $"
                 <<fixed<<setprecision(2)<<showpoint
                 <<static_cast<float>(bet)<<endl;
             cout<<"And your largest card was "
                 <<static_cast<int>(fmax(rng1,rng2))<<endl;
         }else if(dealtot>total){                 //If the dealer busts
-            cout<<"Sorry, but the dealer beat you and you lost $"<<fixed
+            int large=Largest(dealer, count);
+            Dsort(dealer, count);
+            cout<<"Sorry, but "<<name[1]
+                <<" the dealer beat you and you lost $"<<fixed
                 <<setprecision(2)<<showpoint<<static_cast<float>(bet)<<endl;
+            cout<<"The dealer's largest card was "<<large<<endl;
         }else if(dealtot==total){                //If you tie
             cout<<"You and the dealer tied so you get to keep your $"<<fixed
                 <<setprecision(2)<<showpoint<<static_cast<float>(bet)<<endl;
@@ -242,10 +262,48 @@ int main(int argc, char** argv) {
 
 }
 
-void Dealt(int array[], int size){
+bool AutoWin(int num1, int num2){
+    bool Val;
+    if(num1+num2==21){
+        Val=true;
+    }else Val=false;
+    return Val;
+}
+
+int Largest(int Array[][2], int nums){
+    int large=0;
+    for(int i=0;i<=nums+1;i++){
+        if(Array[1][i]>large){
+            large=Array[1][i];
+        }
+    }return large;
+    
+}
+
+void Dsort(int SortAry[][2], int num){
+    for(int i=0;i<=num-1;i++){
+        for(int j=i+1;j<=num;j++){
+            if(SortAry[1][i]>SortAry[1][j]){
+                int temp=SortAry[1][i];
+                SortAry[1][i]=SortAry[1][j];
+                SortAry[1][j]=temp;
+            }
+        }
+    }
+}
+
+void Names(vector<string> &name, int people){
+    for(int i=0;i<=people;i++){
+        cin>>name[i];
+    }
+}
+
+void Dealt(int array[][2]){
     int deal;
-    for(int i=0;i<=size;i++){
-        array[i]=(rand()%11)+1;
+    for(int j=0;j<=1;j++){
+        for(int i=0;i<=10;i++){
+            array[i][j]=(rand()%11)+1;
+        }
     }
 }
 
