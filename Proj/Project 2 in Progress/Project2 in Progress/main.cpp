@@ -1,7 +1,7 @@
 /* 
  * File:   main.cpp
- * Author: Dr Mark E. Lehr
- * Created on January 29, 2018, 6:20 PM
+ * Author: Antonio Gines
+ * Created on February,4 , 2018, 10:00 AM
  * Purpose:  Blackjack 21
  */
 
@@ -20,49 +20,53 @@ using namespace std;
 
 //Global Constants - Math/Physics Constants, Conversions,
 //                   2-D Array Dimensions
+const int PEOPLE=2;                          //The amount of people in the match
 
 //Function Prototypes
 int ace();                                    //Choose Whether an Ace=1 or 11
 int Dealt(int &,int &);                       //Player's Total Cards Dealt
-void Dealt(int [][2]);                        //Cards Dealt to the Dealer
+void Dealt(int [][PEOPLE]);                        //Cards Dealt to the Dealer
 void Names(vector<string> &,int);             //Player's and Dealer's Name
-void Dsort(int [][2], int);                   //Sort the Dealer's Cards
-int  Largest(int [][2], int);                 //Dealer's Largest Card
-bool AutoWin(int, int);
+void Dsort1(int [][PEOPLE], int = 5);         //Bubble Sort Dealer's Cards
+void Dsort2(int [][PEOPLE], int = 5);         //Select Sort Dealer's Card
+int  Largest(int [][PEOPLE], int);                 //Dealer's Largest Card
+bool AutoWin(int, int);                   //Determine if Automatic Win  by 21
+void ShowAry(int [][PEOPLE], int);
 
 //Execution Begins Here
 int main(int argc, char** argv) {
     //Declare Variables
     int SIZE=10;
     int PPL=1;          
-    int bet,newbet,total,rng1,rng2,card1,card2,card3,card4,payout;
+    int bet,newbet,total,rng1,rng2,card1,card2,card3,card4,payout,ptntial;
     int total1,total2,split1,split2,dealer1,dealer2,dealer3,dealtot;
     int dealer[10][2];
     char choice, hitagn, playagn;
     bool win;
-    vector<string> name(2);
+    vector<string> name(2);           //Vector To be Used for Names
     ifstream file;
     
     //Seed Random Number Generator
     srand(static_cast<int>(time(0)));
     
-    //Initialize Variables
+    //Initialize Variables    
+    ptntial=0;                           //Will be used later on as temp
 
     //Rules of the Game
-    file.open("Blackjack.txt");
+    file.open("Blackjack.txt");         //Open The file that gives instructions
     
     string line;
     
     while(file){
     getline(file,line);
     cout<<line<<endl;
-    }file.close();
+    }file.close();                       //Close the file
 
-    //Initialized Variables
+    //Begin Game
     cout<<"Before we begin, what is your name and what is the "
         <<"dealer's name?"<<endl;
-    Names( name, PPL);
-    do{
+    Names( name, PPL);                       //Call FillAry
+    do{ 
     int count1=0;
     newbet=0;
     bet=0;
@@ -135,7 +139,10 @@ int main(int argc, char** argv) {
                     total+=card3;           //Incrementing total value of cards
                     if(card3>card2){
                         rng2=card3;
+                    }else if(ptntial>card3&&ptntial>card2){
+                        rng2=ptntial;
                     }else rng2=card1;
+                    ptntial=card3;
                     cout<<"Bringing your total to:"<<endl;
                     cout<<total<<endl;
                     if(total<=21){         //Choosing to hit again
@@ -219,8 +226,8 @@ int main(int argc, char** argv) {
             cout<<"The dealer chose to hit and the card drawn was:"<<endl;
             cout<<dealer[1][count+2]<<endl;
             count++;
-        }if (count<=2){
-            count=2;
+        }if (count<=1){
+            count=1;
         }
         cout<<"The dealer's total is:"<<endl;
         cout<<dealtot<<endl;
@@ -241,7 +248,14 @@ int main(int argc, char** argv) {
                 <<static_cast<int>(fmax(rng1,rng2))<<endl;
         }else if(dealtot>total){                 //If the dealer busts
             int large=Largest(dealer, count);
-            Dsort(dealer, count);
+            Dsort1(dealer, count);               //Bubble Sorts
+            cout<<name[1]<<"'s cards organized using bubble sort were:"<<endl;
+            ShowAry(dealer, count);
+            Dsort2(dealer, count);               //Selection Sorts
+            cout<<name[1]<<"'s cards organized using selection sort were:"
+                <<endl;
+            ShowAry(dealer, count);
+            cout<<endl;
             cout<<"Sorry, but "<<name[1]
                 <<" the dealer beat you and you lost $"<<fixed
                 <<setprecision(2)<<showpoint<<static_cast<float>(bet)<<endl;
@@ -262,7 +276,13 @@ int main(int argc, char** argv) {
 
 }
 
-bool AutoWin(int num1, int num2){
+void ShowAry(int Array[][2], int number){           //Display Both Sorted Arrays
+    for(int i=0;i<=number+1;i++){
+        cout<<Array[1][i]<<" ";
+    }cout<<endl;
+}
+
+bool AutoWin(int num1, int num2){                    //If first hand is 21
     bool Val;
     if(num1+num2==21){
         Val=true;
@@ -270,7 +290,7 @@ bool AutoWin(int num1, int num2){
     return Val;
 }
 
-int Largest(int Array[][2], int nums){
+int Largest(int Array[][2], int nums){               //Largest Card in hand
     int large=0;
     for(int i=0;i<=nums+1;i++){
         if(Array[1][i]>large){
@@ -280,11 +300,27 @@ int Largest(int Array[][2], int nums){
     
 }
 
-void Dsort(int SortAry[][2], int num){
-    for(int i=0;i<=num-1;i++){
-        for(int j=i+1;j<=num;j++){
+void Dsort2(int Array[][2], int nums){               //Selection Sort
+    int Scan, MinIndx, MinVal;
+    for(Scan=0;Scan<=nums-1;Scan++){
+        MinIndx=Scan;
+        MinVal=Array[1][Scan];
+        for(int index=Scan+1;index<=nums;index++){
+            if (Array[1][index]<MinVal){
+                MinVal=Array[1][index];                 
+                MinIndx=index;
+            }
+        }
+        Array[1][MinIndx]=Array[1][Scan];
+        Array[1][Scan]=MinVal;
+    }
+}
+
+void Dsort1(int SortAry[][2], int num){                 //Bubble Sort
+    for(int i=0;i<=num;i++){
+        for(int j=i+1;j<=num+1;j++){
             if(SortAry[1][i]>SortAry[1][j]){
-                int temp=SortAry[1][i];
+                int temp=SortAry[1][i];               //Pass By Reference
                 SortAry[1][i]=SortAry[1][j];
                 SortAry[1][j]=temp;
             }
@@ -292,13 +328,13 @@ void Dsort(int SortAry[][2], int num){
     }
 }
 
-void Names(vector<string> &name, int people){
+void Names(vector<string> &name, int people){          //Input Names
     for(int i=0;i<=people;i++){
         cin>>name[i];
     }
 }
 
-void Dealt(int array[][2]){
+void Dealt(int array[][2]){                          //Fill An Array
     int deal;
     for(int j=0;j<=1;j++){
         for(int i=0;i<=10;i++){
@@ -307,14 +343,14 @@ void Dealt(int array[][2]){
     }
 }
 
-int Dealt(int &card1,int &card2){
+int Dealt(int &card1,int &card2){                  //Display Total
     int T;
     T=card1+card2;
     cout<<"Your total is "<<T<<endl;
     return T;
 }
 
-int ace(){
+int ace(){                                           //Determine if it is an Ace
     int n;
     cout<<"You have an ace! Would you like the card to be a 1 or an 11?"<<endl;
     cin>>n;
